@@ -2,38 +2,33 @@
    avec deux fichiers distincts : data_memorial.txt et data_birthday.txt.
 """
 
-import logging
-from pathlib import Path
 import datetime as dt
+import logging
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
 
-
+import hdate
+from hdate import HebrewDate
 from homeassistant.core import HomeAssistant
 
-from .lib.hdate import HebrewDate, HDate
-from .const import FILE_PATH_MEMORIAL, FILE_PATH_BIRTHDAY
+from .const import FILE_PATH_BIRTHDAY, FILE_PATH_MEMORIAL
 
 _LOGGER = logging.getLogger(__name__)
 
-def read_data_memorial(hass: HomeAssistant):
+
+#
+# 1) MEMORIAL - Fichier "data_memorial.txt"
+#
+
+
+def _sync_read_data_memorial(file_path: Path) -> list[dict]:
     """
-    Lire le fichier data_memorial.txt qui contient uniquement les décès (dates hébraïques).
-    Format par ligne: name, month, day, year
-    Exemple:
-      David, 5, 10, 5783
-    
-    Retourne une liste de dictionnaires:
-    [
-      {
-        "name": ...,
-        "date": <date grégorienne (datetime.date)>,
-        "type": "memorial",
-        "hdate_original": <HebrewDate (optionnel pour plus tard)>,
-      },
-      ...
-    ]
+    Fonction synchrone qui lit le fichier data_memorial.txt (décès).
+    Cette fonction est exécutée dans un thread séparé via async_add_executor_job.
     """
     data_memorial = []
-    file_path = Path(hass.config.path(FILE_PATH_MEMORIAL))
+
     if not file_path.exists():
         _LOGGER.error("Fichier %s non trouvé", file_path)
         return data_memorial
@@ -54,33 +49,39 @@ def read_data_memorial(hass: HomeAssistant):
                     year = int(parts[3].strip())
 
                     # On crée un HebrewDate
-                    hdate_obj = HebrewDate(year=year, month=month, day=day)
-                    hdate_instance = HDate(hdate_obj)
-                    gdate = hdate_instance.gdate
+                    hdn = HebrewDate(year=year, month=month, day=day)
+                    gdate = hdn.to_gdate()
 
-                    # Log the type of gdate
+                    # Log du type de gdate
                     _LOGGER.debug(
                         "Parsed Memorial - Name: %s, Gregorian Date: %s, Type: %s",
-                        name, gdate, type(gdate)
+                        name,
+                        gdate,
+                        type(gdate),
                     )
 
-                    # Ensure gdate is datetime.date
+                    # Vérifie que gdate est bien un datetime.date
                     if not isinstance(gdate, dt.date):
                         _LOGGER.error(
-                            "Conversion error: gdate is not datetime.date for line: %s", line
+                            "Conversion error: gdate is not datetime.date for line: %s",
+                            line,
                         )
                         continue
 
-                    data_memorial.append({
-                        "name": name,
-                        "date": gdate,           # la date grégorienne
-                        "type": "memorial",      # identifiant pour la suite
-                        "hdate_original": hdate_obj,  # si besoin d'un usage ultérieur
-                    })
+                    data_memorial.append(
+                        {
+                            "name": name,
+                            "date": gdate,  # la date grégorienne
+                            "type": "memorial",  # identifiant pour la suite
+                            "hdate_original": hdn,  # si besoin d'un usage ultérieur
+                        }
+                    )
 
                 except (ValueError, TypeError) as e:
                     _LOGGER.error(
-                        "Impossible de parser la date hébraïque (ligne: %s) : %s", line, e
+                        "Impossible de parser la date hébraïque (ligne: %s) : %s",
+                        line,
+                        e,
                     )
 
     except Exception as e:
@@ -89,25 +90,28 @@ def read_data_memorial(hass: HomeAssistant):
     return data_memorial
 
 
-def read_data_birthday(hass: HomeAssistant):
+async def read_data_memorial(hass: HomeAssistant) -> list[dict]:
     """
-    Lire le fichier data_birthday.txt qui contient uniquement les anniversaires (dates grégoriennes).
-    Format par ligne : name, YYYY-MM-DD
-    Exemple:
-      Laura, 1985-02-25
+    Fonction asynchrone (appelée dans du code async) :
+    - Appelle _sync_read_data_memorial en dehors de la boucle événementielle
+      via async_add_executor_job.
+    """
+    file_path = Path(hass.config.path(FILE_PATH_MEMORIAL))
+    return await hass.async_add_executor_job(_sync_read_data_memorial, file_path)
 
-    Retourne une liste de dictionnaires:
-    [
-      {
-        "name": ...,
-        "date": <date grégorienne (datetime.date)>,
-        "type": "birthday",
-      },
-      ...
-    ]
+
+#
+# 2) BIRTHDAY - Fichier "data_birthday.txt"
+#
+
+
+def _sync_read_data_birthday(file_path: Path) -> list[dict]:
+    """
+    Fonction synchrone qui lit le fichier data_birthday.txt (anniversaires).
+    Exécutée dans un thread séparé.
     """
     data_birthday = []
-    file_path = Path(hass.config.path(FILE_PATH_BIRTHDAY))
+
     if not file_path.exists():
         _LOGGER.error("Fichier %s non trouvé", file_path)
         return data_birthday
@@ -126,17 +130,31 @@ def read_data_birthday(hass: HomeAssistant):
 
                 try:
                     gdate = dt.datetime.strptime(date_str, "%Y-%m-%d").date()
-                    data_birthday.append({
-                        "name": name,
-                        "date": gdate,
-                        "type": "birthday",
-                    })
+                    data_birthday.append(
+                        {
+                            "name": name,
+                            "date": gdate,
+                            "type": "birthday",
+                        }
+                    )
                 except ValueError as e:
                     _LOGGER.error(
-                        "Impossible de parser la date grégorienne (ligne: %s) : %s", line, e
+                        "Impossible de parser la date grégorienne (ligne: %s) : %s",
+                        line,
+                        e,
                     )
 
     except Exception as e:
         _LOGGER.error("Erreur de lecture du fichier %s : %s", file_path, e)
 
     return data_birthday
+
+
+async def read_data_birthday(hass: HomeAssistant) -> list[dict]:
+    """
+    Fonction asynchrone (appelée dans du code async) :
+    - Appelle _sync_read_data_birthday en dehors de la boucle événementielle
+      via async_add_executor_job.
+    """
+    file_path = Path(hass.config.path(FILE_PATH_BIRTHDAY))
+    return await hass.async_add_executor_job(_sync_read_data_birthday, file_path)

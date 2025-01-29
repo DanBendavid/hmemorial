@@ -26,9 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     await coordinator.async_config_entry_first_refresh()
 
     # Stocker le coordonnateur dans hass.data
-    hass.data[DOMAIN][entry.entry_id] = {
-        "coordinator": coordinator
-    }
+    hass.data[DOMAIN][entry.entry_id] = {"coordinator": coordinator}
 
     # Configurer les plateformes (capteurs)
     await hass.config_entries.async_forward_entry_setup(entry, "sensor")
@@ -44,4 +42,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         # Supprimer le coordonnateur des données stockées
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok
-

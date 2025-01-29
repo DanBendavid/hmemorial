@@ -7,14 +7,16 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE, CONF_ELEVATION, CONF_TIME_ZONE
+from homeassistant.const import (
+    CONF_ELEVATION,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
+    CONF_TIME_ZONE,
+)
 from homeassistant.core import HomeAssistant, callback
 
-from .const import (
-    DOMAIN,
-    DEFAULT_NAME,
-    OPTIONS_SCHEMA,  # Un exemple de schéma d'options défini dans const.py
-)
+from .const import OPTIONS_SCHEMA  # Un exemple de schéma d'options défini dans const.py
+from .const import DEFAULT_NAME, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +37,9 @@ def _get_data_schema(hass: HomeAssistant) -> vol.Schema:
             vol.Optional(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
             vol.Optional(CONF_LONGITUDE, default=default_lon): vol.Coerce(float),
             vol.Optional(CONF_ELEVATION, default=default_elev): vol.Coerce(int),
-            vol.Optional(CONF_TIME_ZONE, default=default_tz): vol.In(sorted(zoneinfo.available_timezones())),
+            vol.Optional(CONF_TIME_ZONE, default=default_tz): vol.In(
+                sorted(zoneinfo.available_timezones())
+            ),
         }
     )
 
@@ -68,7 +72,7 @@ class HmemorialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Si tout va bien, on crée l’entrée
             return self.async_create_entry(
                 title=DEFAULT_NAME,  # Nom de l'entrée dans HA
-                data=user_input,     # Données finales stockées dans la ConfigEntry
+                data=user_input,  # Données finales stockées dans la ConfigEntry
             )
 
         # Si on n’a pas de saisie, on affiche le formulaire

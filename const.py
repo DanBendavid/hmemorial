@@ -10,12 +10,10 @@ CONF_TIME_ZONE = "time_zone"
 
 # Valeurs par défaut
 DEFAULT_NAME = "HMemorial"
+DEFAULT_LANGUAGE = "english"
 
 # Intervalles de mise à jour (en secondes)
 DEFAULT_SCAN_INTERVAL = 60
-
-# URLs ou endpoints API (si nécessaire)
-# API_ENDPOINT = "https://api.hmemorial.example.com/data"
 
 # Autres constantes
 ATTRIBUTION = "Data provided by HMemorial"

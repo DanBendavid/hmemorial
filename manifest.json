@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "documentation": "https://github.com/votre-utilisateur/hmemorial#readme",
   "description": "Intégration pour Hebrew Memorial, permettant de surveiller et de gérer les données spécifiques.",
-  "requirements": [],
+  "requirements": ["hdate @ git+https://github.com/py-libhdate/py-libhdate.git@main"],
   "dependencies": [],
-  "codeowners": ["@votregithubusername"],
+  "codeowners": ["@DanBendavid"],
   "config_flow": true,
   "iot_class": "cloud_polling",
   "quality_scale": "stable",
-  "issue_tracker": "https://github.com/votre-utilisateur/hmemorial/issues",
-  "logo": "https://raw.githubusercontent.com/votre-utilisateur/hmemorial/main/logo.png"
+  "issue_tracker": "https://github.com/DanBendavid/hmemorial/issues",
+  "logo": "https://raw.githubusercontent.com/DanBendavid/hmemorial/main/logo.png"
 }
