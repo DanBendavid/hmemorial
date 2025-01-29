@@ -1,8 +1,8 @@
 {
   "domain": "hmemorial",
   "name": "Hebrew Memorial",
-  "version": "1.0.0",
-  "documentation": "https://github.com/votre-utilisateur/hmemorial#readme",
+  "version": "0.0.1",
+  "documentation": "https://github.com/DanBendavid/hmemorial#readme",
   "description": "Intégration pour Hebrew Memorial, permettant de surveiller et de gérer les données spécifiques.",
   "requirements": ["hdate @ git+https://github.com/py-libhdate/py-libhdate.git@main"],
   "dependencies": [],
