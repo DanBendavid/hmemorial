@@ -1,4 +1,5 @@
 """Plateforme de capteurs pour hmemorial."""
+
 import logging
 from datetime import datetime, timedelta
 
@@ -6,10 +7,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, ATTRIBUTION
+from .const import ATTRIBUTION, DOMAIN
 from .coordinator import HmemorialDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -17,17 +19,30 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Configurer les capteurs à partir de l'entrée de configuration."""
-    coordinator: HmemorialDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator: HmemorialDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][
+        "coordinator"
+    ]
 
     sensors = [
         # Mémorial
-        MemorialSensor(coordinator, "Memorial Today", target_date=datetime.now().date()),
-        MemorialSensor(coordinator, "Memorial Tomorrow", target_date=(datetime.now().date() + timedelta(days=1))),
+        MemorialSensor(
+            coordinator, "Memorial Today", target_date=datetime.now().date()
+        ),
+        MemorialSensor(
+            coordinator,
+            "Memorial Tomorrow",
+            target_date=(datetime.now().date() + timedelta(days=1)),
+        ),
         MemorialSensor(coordinator, "Memorial Current Week", within_week=True),
-
         # Anniversaires
-        BirthdaySensor(coordinator, "Birthday Today", target_date=datetime.now().date()),
-        BirthdaySensor(coordinator, "Birthday Tomorrow", target_date=(datetime.now().date() + timedelta(days=1))),
+        BirthdaySensor(
+            coordinator, "Birthday Today", target_date=datetime.now().date()
+        ),
+        BirthdaySensor(
+            coordinator,
+            "Birthday Tomorrow",
+            target_date=(datetime.now().date() + timedelta(days=1)),
+        ),
         BirthdaySensor(coordinator, "Birthday Current Week", within_week=True),
     ]
 
@@ -39,8 +54,13 @@ class MemorialSensor(CoordinatorEntity):
 
     _attr_should_poll = False
 
-    def __init__(self, coordinator: HmemorialDataUpdateCoordinator, name: str,
-                 target_date=None, within_week=False):
+    def __init__(
+        self,
+        coordinator: HmemorialDataUpdateCoordinator,
+        name: str,
+        target_date=None,
+        within_week=False,
+    ):
         """Initialiser le capteur."""
         super().__init__(coordinator)
         self._name = name
@@ -92,10 +112,7 @@ class MemorialSensor(CoordinatorEntity):
                 if today <= entry["date"] <= end_of_week:
                     filtered.append(entry)
 
-        self._events = [
-            f"{item['name']} ({item['date']})"
-            for item in filtered
-        ]
+        self._events = [f"{item['name']} ({item['date']})" for item in filtered]
 
         self.async_write_ha_state()
 
@@ -105,8 +122,13 @@ class BirthdaySensor(CoordinatorEntity):
 
     _attr_should_poll = False
 
-    def __init__(self, coordinator: HmemorialDataUpdateCoordinator, name: str,
-                 target_date=None, within_week=False):
+    def __init__(
+        self,
+        coordinator: HmemorialDataUpdateCoordinator,
+        name: str,
+        target_date=None,
+        within_week=False,
+    ):
         """Initialiser le capteur."""
         super().__init__(coordinator)
         self._name = name
@@ -142,21 +164,24 @@ class BirthdaySensor(CoordinatorEntity):
             for entry in data_birthday:
                 # On compare uniquement mois+jour, si on veut ignorer l'année
                 # ou on compare la date entière si on veut l'année exacte
-                if entry["date"].month == self._target_date.month and \
-                   entry["date"].day == self._target_date.day:
+                if (
+                    entry["date"].month == self._target_date.month
+                    and entry["date"].day == self._target_date.day
+                ):
                     filtered.append(entry)
 
         elif self._within_week:
-
             today = datetime.now().date()
-            end_of_week = today + timedelta(days=6)
+            next_week = [today + timedelta(days=i) for i in range(7)]
             for entry in data_birthday:
-                if today <= entry["date"] <= end_of_week:
-                    filtered.append(entry)
+                for day in next_week:
+                    if (
+                        entry["date"].month == day.month
+                        and entry["date"].day == day.day
+                    ):
+                        filtered.append(entry)
+                    break  # Passer à l'entrée suivante après une correspondance
 
-        self._events = [
-            f"{item['name']} ({item['date']})"
-            for item in filtered
-        ]
+        self._events = [f"{item['name']} ({item['date']})" for item in filtered]
 
         self.async_write_ha_state()
