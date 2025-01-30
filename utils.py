@@ -46,7 +46,11 @@ def _sync_read_data_memorial(file_path: Path) -> list[dict]:
                 try:
                     month = int(parts[1].strip())
                     day = int(parts[2].strip())
-                    year = int(parts[3].strip())
+                    year_str = parts[3].strip()
+                    if year_str:
+                        year = int(year_str)
+                    else:
+                        year = 5785
 
                     # On crée un HebrewDate
                     hdn = HebrewDate(year=year, month=month, day=day)
@@ -73,7 +77,7 @@ def _sync_read_data_memorial(file_path: Path) -> list[dict]:
                             "name": name,
                             "date": gdate,  # la date grégorienne
                             "type": "memorial",  # identifiant pour la suite
-                            "hdate_original": hdn,  # si besoin d'un usage ultérieur
+                            "hdate": hdn,  # la date hebraique
                         }
                     )
 

@@ -3,6 +3,7 @@
 import logging
 from datetime import datetime, timedelta
 
+from hdate import HebrewDate
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -98,19 +99,28 @@ class MemorialSensor(CoordinatorEntity):
         filtered = []
 
         if self._target_date:
-            # On compare la date grégorienne stockée à self._target_date
+            # On compare la date hebraique stockée à self._target_date
             for entry in data_memorial:
-                if entry["date"] == self._target_date:
+                if (
+                    entry["hdate"].month
+                    == HebrewDate.from_gdate(self._target_date).month
+                    and entry["hdate"].day
+                    == HebrewDate.from_gdate(self._target_date).day
+                ):
                     filtered.append(entry)
 
         elif self._within_week:
-            # On définit la "semaine courante" comme du jour J à J+6
-            # ou toute autre logique de calcul
             today = datetime.now().date()
-            end_of_week = today + timedelta(days=6)
+            next_week = [today + timedelta(days=i) for i in range(7)]
             for entry in data_memorial:
-                if today <= entry["date"] <= end_of_week:
-                    filtered.append(entry)
+                for _day in next_week:
+                    _hday = HebrewDate.from_gdate(_day)
+                    if (
+                        entry["hdate"].month == _hday.month
+                        and entry["hdate"].day == _hday.day
+                    ):
+                        filtered.append(entry)
+                    break  # Passer à l'entrée suivante après une correspondance
 
         self._events = [f"{item['name']} ({item['date']})" for item in filtered]
 
@@ -174,10 +184,10 @@ class BirthdaySensor(CoordinatorEntity):
             today = datetime.now().date()
             next_week = [today + timedelta(days=i) for i in range(7)]
             for entry in data_birthday:
-                for day in next_week:
+                for _day in next_week:
                     if (
-                        entry["date"].month == day.month
-                        and entry["date"].day == day.day
+                        entry["date"].month == _day.month
+                        and entry["date"].day == _day.day
                     ):
                         filtered.append(entry)
                     break  # Passer à l'entrée suivante après une correspondance
