@@ -44,8 +44,8 @@ def _sync_read_data_memorial(file_path: Path) -> list[dict]:
 
                 name = parts[0].strip()
                 try:
-                    month = int(parts[1].strip())
-                    day = int(parts[2].strip())
+                    day = int(parts[1].strip())
+                    month = int(parts[2].strip())
                     year_str = parts[3].strip()
                     if year_str:
                         year = int(year_str)
