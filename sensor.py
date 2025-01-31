@@ -120,9 +120,8 @@ class MemorialSensor(CoordinatorEntity):
                         and entry["hdate"].day == _hday.day
                     ):
                         filtered.append(entry)
-                    break  # Passer à l'entrée suivante après une correspondance
 
-        self._events = [f"{item['name']} ({item['date']})" for item in filtered]
+        self._events = [f"{item['name']} ({item['hdate']})" for item in filtered]
 
         self.async_write_ha_state()
 
@@ -190,7 +189,6 @@ class BirthdaySensor(CoordinatorEntity):
                         and entry["date"].day == _day.day
                     ):
                         filtered.append(entry)
-                    break  # Passer à l'entrée suivante après une correspondance
 
         self._events = [f"{item['name']} ({item['date']})" for item in filtered]
 
