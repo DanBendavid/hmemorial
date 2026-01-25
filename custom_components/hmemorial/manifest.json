@@ -1,7 +1,7 @@
 {
   "domain": "hmemorial",
   "name": "Hebrew Memorial",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "documentation": "https://github.com/DanBendavid/hmemorial#readme",
   "description": "Extension de Jewish Calendar avec date d'anniversaire de naissance et de deces. Tekoufots et Tahanounim. ",
   "requirements": ["hdate[astral]==1.1.2"],

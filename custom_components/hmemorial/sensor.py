@@ -15,7 +15,7 @@ except Exception:
     babel_format_date = None
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo, Entity
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -23,6 +23,7 @@ from .const import (
     ATTRIBUTION,
     CONF_PRAYER_ONLY,
     DEFAULT_LANGUAGE,
+    DEFAULT_NAME,
     DEFAULT_TRADITION,
     DOMAIN,
 )
@@ -208,6 +209,13 @@ class BaseSensor(CoordinatorEntity):
         self._name = name
         if entry_id:
             self._attr_unique_id = f"{DOMAIN}_{entry_id}_{entity_id}"
+            self._attr_device_info = DeviceInfo(
+                identifiers={(DOMAIN, entry_id)},
+                name=DEFAULT_NAME,
+                manufacturer="HMemorial",
+                model="Hebrew Memorial",
+                entry_type=DeviceEntryType.SERVICE,
+            )
         else:
             self._attr_unique_id = f"{DOMAIN}_{entity_id}"
 
@@ -225,18 +233,6 @@ class BaseSensor(CoordinatorEntity):
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Attributs de base communs."""
         return {"attribution": ATTRIBUTION}
-
-    @property
-    def device_info(self) -> Optional[DeviceInfo]:
-        if not self._entry_id:
-            return None
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._entry_id)},
-            name="HMemorial",
-            manufacturer="Custom",
-            model="Jewish Memorial & Calendar",
-            entry_type="service",
-        )
 
     def _get_week_dates(self) -> List[dt.date]:
         """Retourne la liste des 7 prochains jours."""
