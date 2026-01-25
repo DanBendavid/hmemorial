@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -38,6 +39,8 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[str] = ["sensor"]  # Plates-formes gérées
 _FRONTEND_URL = "/hmemorial/hmemorial-card.js"
 _FRONTEND_FILE = Path(__file__).parent / "frontend" / "hmemorial-card.js"
+_COMMUNITY_CARD_DIR = Path("www") / "community" / "hmemorial-card"
+_COMMUNITY_CARD_FILE = "hmemorial-card.js"
 
 
 @dataclass(frozen=True)
@@ -66,10 +69,28 @@ def _register_frontend(hass: HomeAssistant) -> None:
     data["_frontend_registered"] = True
 
 
+def _ensure_community_card(hass: HomeAssistant) -> None:
+    target_dir = Path(hass.config.path(str(_COMMUNITY_CARD_DIR)))
+    target_file = target_dir / _COMMUNITY_CARD_FILE
+    source_file = _FRONTEND_FILE
+
+    try:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        if target_file.exists():
+            same_size = target_file.stat().st_size == source_file.stat().st_size
+            if same_size and target_file.stat().st_mtime >= source_file.stat().st_mtime:
+                return
+        shutil.copyfile(source_file, target_file)
+    except Exception as err:
+        _LOGGER.warning("Unable to copy frontend card to %s: %s", target_file, err)
+
+
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Initialisation du composant."""
     _LOGGER.debug("Initialisation du composant hmemorial")
     _register_frontend(hass)
+    await hass.async_add_executor_job(_ensure_community_card, hass)
+    await hass.async_add_executor_job(_ensure_community_card, hass)
     return True
 
 
