@@ -1,3 +1,89 @@
+const HM_LANG_MAP = {
+  en: "en-US",
+  fr: "fr-FR",
+  he: "he-IL",
+};
+
+const HM_I18N = {
+  en: {
+    title: "Hmemorial",
+    notFound: "Entity not found: {entity}",
+    emptyEvents: "No events",
+    birthdayTitle: "Birthdays",
+    emptyBirthdays: "No birthdays this week.",
+    birthdayTodaySuffix: "celebrates a birthday today.",
+    birthdayOnSuffix: "celebrates a birthday on {weekday}.",
+    birthdayDefaultSuffix: "celebrates a birthday.",
+    yearsSuffix: " years",
+  },
+  fr: {
+    title: "Hmemorial",
+    notFound: "Entite introuvable: {entity}",
+    emptyEvents: "Aucun evenement",
+    birthdayTitle: "Anniversaires",
+    emptyBirthdays: "Aucun anniversaire cette semaine.",
+    birthdayTodaySuffix: "fete son anniversaire aujourd'hui.",
+    birthdayOnSuffix: "fete son anniversaire ce {weekday}.",
+    birthdayDefaultSuffix: "fete son anniversaire.",
+    yearsSuffix: " ans",
+  },
+  he: {
+    title: "Hmemorial",
+    notFound: "היישות לא נמצאה: {entity}",
+    emptyEvents: "אין אירועים",
+    birthdayTitle: "ימי הולדת",
+    emptyBirthdays: "אין ימי הולדת השבוע.",
+    birthdayTodaySuffix: "חוגג יום הולדת היום.",
+    birthdayOnSuffix: "חוגג יום הולדת ביום {weekday}.",
+    birthdayDefaultSuffix: "חוגג יום הולדת.",
+    yearsSuffix: " שנים",
+  },
+};
+
+const hmNormalizeLang = (lang) => {
+  if (!lang) {
+    return "en";
+  }
+  const lower = String(lang).toLowerCase();
+  if (lower.startsWith("fr")) {
+    return "fr";
+  }
+  if (lower.startsWith("he")) {
+    return "he";
+  }
+  return "en";
+};
+
+const hmGetLang = (config, hass) =>
+  hmNormalizeLang(
+    config.language ||
+      config.lang ||
+      (hass && hass.language) ||
+      (hass && hass.locale && hass.locale.language),
+  );
+
+const hmT = (lang, key, vars) => {
+  const dict = HM_I18N[lang] || HM_I18N.en;
+  const template = dict[key] || "";
+  return template.replace(/\{(\w+)\}/g, (match, name) =>
+    Object.prototype.hasOwnProperty.call(vars || {}, name) ? vars[name] : match,
+  );
+};
+
+const hmWeekdayLabel = (date, lang) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return null;
+  }
+  const locale = HM_LANG_MAP[lang] || HM_LANG_MAP.en;
+  try {
+    const weekday = date.toLocaleDateString(locale, { weekday: "long" });
+    return `${weekday} ${date.getDate()}`;
+  } catch (err) {
+    const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+    return `${weekday} ${date.getDate()}`;
+  }
+};
+
 class HmemorialCard extends HTMLElement {
   setConfig(config) {
     if (!config.entity) {
@@ -6,6 +92,7 @@ class HmemorialCard extends HTMLElement {
 
     this._config = {
       title: null,
+      show_age: true,
       ...config,
     };
 
@@ -49,18 +136,21 @@ class HmemorialCard extends HTMLElement {
     }
 
     const stateObj = hass.states[this._config.entity];
+    const lang = hmGetLang(this._config, hass);
+    const strings = HM_I18N[lang] || HM_I18N.en;
     const title =
       this._config.title ||
       (stateObj && stateObj.attributes && stateObj.attributes.friendly_name) ||
-      "Hmemorial";
+      strings.title;
 
     this._card.header = title;
+    this._card.setAttribute("dir", lang === "he" ? "rtl" : "ltr");
     this._content.innerHTML = "";
 
     if (!stateObj) {
       const row = document.createElement("div");
       row.className = "empty";
-      row.textContent = `Entity not found: ${this._config.entity}`;
+      row.textContent = hmT(lang, "notFound", { entity: this._config.entity });
       this._content.appendChild(row);
       return;
     }
@@ -69,7 +159,7 @@ class HmemorialCard extends HTMLElement {
     if (!Array.isArray(events) || events.length === 0) {
       const row = document.createElement("div");
       row.className = "empty";
-      row.textContent = "Aucun evenement";
+      row.textContent = strings.emptyEvents;
       this._content.appendChild(row);
       return;
     }
@@ -124,7 +214,7 @@ class HmemorialBirthdayCard extends HTMLElement {
     }
 
     this._config = {
-      title: "Anniversaires",
+      title: null,
       ...config,
     };
 
@@ -158,18 +248,21 @@ class HmemorialBirthdayCard extends HTMLElement {
     }
 
     const stateObj = hass.states[this._config.entity];
+    const lang = hmGetLang(this._config, hass);
+    const strings = HM_I18N[lang] || HM_I18N.en;
     const title =
       this._config.title ||
       (stateObj && stateObj.attributes && stateObj.attributes.friendly_name) ||
-      "Anniversaires";
+      strings.birthdayTitle;
 
     this._card.header = title;
+    this._card.setAttribute("dir", lang === "he" ? "rtl" : "ltr");
     this._content.innerHTML = "";
 
     if (!stateObj) {
       const row = document.createElement("div");
       row.className = "empty";
-      row.textContent = `Entity not found: ${this._config.entity}`;
+      row.textContent = hmT(lang, "notFound", { entity: this._config.entity });
       this._content.appendChild(row);
       return;
     }
@@ -178,20 +271,10 @@ class HmemorialBirthdayCard extends HTMLElement {
     if (!Array.isArray(events) || events.length === 0) {
       const row = document.createElement("div");
       row.className = "empty";
-      row.textContent = "Aucun anniversaire cette semaine.";
+      row.textContent = strings.emptyBirthdays;
       this._content.appendChild(row);
       return;
     }
-
-    const jours = {
-      Monday: "lundi",
-      Tuesday: "mardi",
-      Wednesday: "mercredi",
-      Thursday: "jeudi",
-      Friday: "vendredi",
-      Saturday: "samedi",
-      Sunday: "dimanche",
-    };
 
     const today = new Date();
     const todayY = today.getFullYear();
@@ -204,7 +287,9 @@ class HmemorialBirthdayCard extends HTMLElement {
 
       const nameText = entry.name || "";
       const ageText =
-        typeof entry.age === "number" ? ` (${entry.age} ans)` : "";
+        this._config.show_age && typeof entry.age === "number"
+          ? ` (${entry.age}${strings.yearsSuffix})`
+          : "";
 
       const strong = document.createElement("strong");
       strong.textContent = `${nameText}${ageText}`;
@@ -220,23 +305,18 @@ class HmemorialBirthdayCard extends HTMLElement {
         eventDate.getMonth() === todayM &&
         eventDate.getDate() === todayD;
 
-      let weekday = null;
-      if (eventDate && !isNaN(eventDate)) {
-        const weekdayEn = eventDate.toLocaleDateString("en-US", {
-          weekday: "long",
-        });
-        weekday = jours[weekdayEn] || weekdayEn;
-      } else if (entry.gdate_cy_weekday) {
+      let weekday = hmWeekdayLabel(eventDate, lang);
+      if (!weekday && entry.gdate_cy_weekday) {
         weekday = entry.gdate_cy_weekday;
       }
 
       const sentence = document.createElement("span");
       if (isToday) {
-        sentence.textContent = " fete son anniversaire aujourd'hui.";
+        sentence.textContent = ` ${hmT(lang, "birthdayTodaySuffix")}`;
       } else if (weekday) {
-        sentence.textContent = ` fete son anniversaire ce ${weekday}.`;
+        sentence.textContent = ` ${hmT(lang, "birthdayOnSuffix", { weekday })}`;
       } else {
-        sentence.textContent = " fete son anniversaire.";
+        sentence.textContent = ` ${hmT(lang, "birthdayDefaultSuffix")}`;
       }
 
       row.appendChild(strong);
