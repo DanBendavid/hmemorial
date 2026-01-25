@@ -96,7 +96,13 @@ This integration ships a simple card for memorial events.
 ```yaml
 type: custom:hmemorial-card
 entity: sensor.hmemorial_memorial_current_week
-title: Memorials this week
+title: 🕯️ Memorials this week
+```
+
+```yaml
+type: custom:hmemorial-card
+entity: sensor.hmemorial_memorial_current_week
+title: 🎂 Anniversaires de la semaine
 ```
 
 Note: The card expects `events` attributes with objects (the memorial sensors).

@@ -136,6 +136,7 @@ async def async_setup_entry(
                     "birthday_today",
                     "Birthday Today",
                     target_date=datetime.now().date(),
+                    language=language,
                     entry_id=entry.entry_id,
                 ),
                 BirthdaySensor(
@@ -143,6 +144,7 @@ async def async_setup_entry(
                     "birthday_tomorrow",
                     "Birthday Tomorrow",
                     target_date=datetime.now().date() + timedelta(days=1),
+                    language=language,
                     entry_id=entry.entry_id,
                 ),
                 BirthdaySensor(
@@ -150,6 +152,7 @@ async def async_setup_entry(
                     "birthday_current_week",
                     "Birthday Current Week",
                     within_week=True,
+                    language=language,
                     entry_id=entry.entry_id,
                 ),
             ]
@@ -403,6 +406,7 @@ class BirthdaySensor(BaseSensor):
         name: str,
         target_date: Optional[dt.date] = None,
         within_week: bool = False,
+        language: str = DEFAULT_LANGUAGE,
         entry_id: Optional[str] = None,
     ):
         """Initialiser le capteur anniversaire."""
@@ -410,6 +414,7 @@ class BirthdaySensor(BaseSensor):
         self._attr_icon = "mdi:cake-variant"
         self._target_date = target_date
         self._within_week = within_week
+        self._language = language
         self._events = []
 
     @property
@@ -423,6 +428,54 @@ class BirthdaySensor(BaseSensor):
         attrs = super().extra_state_attributes
         attrs["events"] = self._events
         return attrs
+
+    def _format_weekday(self, date: Optional[dt.date]) -> Optional[str]:
+        if not isinstance(date, dt.date):
+            return None
+        if babel_format_date is None:
+            return f"{date.strftime('%A')} {date.day}"
+        locale = _BABEL_LOCALE_MAP.get(self._language, self._language)
+        try:
+            return babel_format_date(date, "EEEE d", locale=locale)
+        except Exception:
+            return f"{date.strftime('%A')} {date.day}"
+
+    def _get_current_year_gdate(self, date: dt.date) -> Optional[dt.date]:
+        """Return the birthday date for the current year."""
+        if not isinstance(date, dt.date):
+            return None
+        today = dt.date.today()
+        try:
+            return date.replace(year=today.year)
+        except ValueError:
+            if date.month == 2 and date.day == 29:
+                return dt.date(today.year, 2, 28)
+            return None
+
+    def _calculate_age(
+        self, birth_date: dt.date, event_date: Optional[dt.date]
+    ) -> Optional[int]:
+        if not isinstance(birth_date, dt.date) or birth_date.year <= 0:
+            return None
+        if not isinstance(event_date, dt.date):
+            return None
+        age = event_date.year - birth_date.year
+        if age < 0:
+            return None
+        return age
+
+    def _format_event(self, item: Dict[str, Any]) -> Dict[str, Any]:
+        """Build the JSON structure for a birthday event."""
+        gdate = item.get("date")
+        gdate_cy = self._get_current_year_gdate(gdate) if gdate else None
+        gdate_cy_str = gdate_cy.isoformat() if isinstance(gdate_cy, dt.date) else None
+        age = self._calculate_age(gdate, gdate_cy) if gdate else None
+        return {
+            "name": item.get("name"),
+            "gdate_cy": gdate_cy_str,
+            "age": age,
+            "gdate_cy_weekday": self._format_weekday(gdate_cy) if gdate_cy else None,
+        }
 
     def _handle_coordinator_update(self) -> None:
         """Mise à jour des événements d'anniversaire."""
@@ -450,7 +503,7 @@ class BirthdaySensor(BaseSensor):
                 if (entry["date"].month, entry["date"].day) in week_dates
             ]
 
-        self._events = [f"{item['name']} ({item['date']})" for item in filtered]
+        self._events = [self._format_event(item) for item in filtered]
 
         self.async_write_ha_state()
 
