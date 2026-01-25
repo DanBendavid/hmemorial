@@ -1,0 +1,14 @@
+{
+  "entity": {
+    "sensor": {
+      "tahanounim": {
+        "name": "Tahanoun",
+        "state": {
+          "yes": "Taḥanoun is recited with Nefilat Apayim",
+          "no": "Taḥanoun is not recited",
+          "without_nefilat_apayim": "Taḥanoun is recited (without Nefilat Apayim)"
+        }
+      }
+    }
+  }
+}

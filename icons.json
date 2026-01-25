@@ -1,0 +1,49 @@
+{
+  "services": {
+    "count_omer": {
+      "service": "mdi:counter"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "issur_melacha_in_effect": {
+        "default": "mdi:power-plug-off"
+      },
+      "erev_shabbat_hag": {
+        "default": "mdi:candle-light"
+      },
+      "motzei_shabbat_hag": {
+        "default": "mdi:fire"
+      }
+    },
+    "sensor": {
+      "memorial_today": {
+        "default": "mdi:candle"
+      },
+      "memorial_tomorrow": {
+        "default": "mdi:candle"
+      },
+      "memorial_current_week": {
+        "default": "mdi:candle"
+      },
+      "birthday_today": {
+        "default": "mdi:cake-variant"
+      },
+      "birthday_tomorrow": {
+        "default": "mdi:cake-variant"
+      },
+      "birthday_current_week": {
+        "default": "mdi:cake-variant"
+      },
+      "bircat_hachanim_he_diaspora_sephardi": {
+        "default": "mdi:book-open-page-variant"
+      },
+      "parasha_hayom_en_diaspora_ashkenazi": {
+        "default": "mdi:book-open-variant"
+      },
+      "tahanounim_en_diaspora_ashkenazi": {
+        "default": "mdi:hands-pray"
+      }
+    }
+  }
+}

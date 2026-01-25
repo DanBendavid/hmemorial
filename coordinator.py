@@ -17,7 +17,7 @@ class HmemorialDataUpdateCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=60),
+            update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
         )
 
     async def _async_update_data(self):

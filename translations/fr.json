@@ -1,0 +1,14 @@
+{
+  "entity": {
+    "sensor": {
+      "tahanounim": {
+        "name": "Taḥanoun",
+        "state": {
+          "yes": "Avec Taḥanounim et Nefilat Apayim",
+          "no": "Sans Taḥanounim",
+          "without_nefilat_apayim": "Avec Taḥanounim (sans Nefilat Apayim)"
+        }
+      }
+    }
+  }
+}

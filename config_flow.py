@@ -3,25 +3,89 @@
 """Flux de configuration pour hmemorial."""
 import logging
 import zoneinfo
-from typing import Any
+from functools import partial
+from typing import Any, get_args
 
 import voluptuous as vol
+from hdate.translator import Language
 from homeassistant import config_entries
 from homeassistant.const import (
     CONF_ELEVATION,
+    CONF_LANGUAGE,
     CONF_LATITUDE,
+    CONF_LOCATION,
     CONF_LONGITUDE,
     CONF_TIME_ZONE,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.selector import (
+    BooleanSelector,
+    LanguageSelector,
+    LanguageSelectorConfig,
+    LocationSelector,
+    SelectSelector,
+    SelectSelectorConfig,
+)
 
-from .const import OPTIONS_SCHEMA  # Un exemple de schéma d'options défini dans const.py
-from .const import DEFAULT_NAME, DOMAIN
+from .const import (
+    CONF_CANDLE_LIGHT_MINUTES,
+    CONF_DIASPORA,
+    CONF_HAVDALAH_OFFSET_MINUTES,
+    CONF_PRAYER_ONLY,
+    CONF_TRADITION,
+    DEFAULT_CANDLE_LIGHT,
+    DEFAULT_DIASPORA,
+    DEFAULT_HAVDALAH_OFFSET_MINUTES,
+    DEFAULT_LANGUAGE,
+    DEFAULT_NAME,
+    DEFAULT_TRADITION,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
+NUSACHIM = ["ashkenazi", "sephardi"]
+# LANGUAGES = ["he", "fr", "en"]
 
-def _get_data_schema(hass: HomeAssistant) -> vol.Schema:
+
+def _get_options_schema(
+    hass: HomeAssistant, entry: config_entries.ConfigEntry
+) -> vol.Schema:
+    """Créer le schéma des options."""
+    merged = {**entry.data, **entry.options}
+    return vol.Schema(
+        {
+            vol.Optional(
+                CONF_TRADITION, default=merged.get(CONF_TRADITION, DEFAULT_TRADITION)
+            ): vol.In(NUSACHIM),
+            vol.Optional(
+                CONF_LANGUAGE, default=merged.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+            ): LanguageSelector(
+                LanguageSelectorConfig(languages=list(get_args(Language)))
+            ),
+            vol.Optional(
+                CONF_DIASPORA, default=merged.get(CONF_DIASPORA, DEFAULT_DIASPORA)
+            ): bool,
+            vol.Optional(
+                CONF_PRAYER_ONLY, default=merged.get(CONF_PRAYER_ONLY, False)
+            ): BooleanSelector(),
+            vol.Optional(
+                CONF_CANDLE_LIGHT_MINUTES,
+                default=merged.get(CONF_CANDLE_LIGHT_MINUTES, DEFAULT_CANDLE_LIGHT),
+            ): int,
+            vol.Optional(
+                CONF_HAVDALAH_OFFSET_MINUTES,
+                default=merged.get(
+                    CONF_HAVDALAH_OFFSET_MINUTES, DEFAULT_HAVDALAH_OFFSET_MINUTES
+                ),
+            ): int,
+        }
+    )
+
+
+def _get_data_schema(
+    hass: HomeAssistant, prayer_only_default: bool = False
+) -> vol.Schema:
     """Créer le schéma Voluptuous pour la configuration initiale."""
     # Valeurs par défaut récupérées de la config HA
     default_lat = hass.config.latitude
@@ -34,6 +98,14 @@ def _get_data_schema(hass: HomeAssistant) -> vol.Schema:
     # Ici, on les expose séparément pour la lisibilité.
     return vol.Schema(
         {
+            vol.Required(CONF_TRADITION, default=DEFAULT_TRADITION): vol.In(NUSACHIM),
+            vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): LanguageSelector(
+                LanguageSelectorConfig(languages=list(get_args(Language)))
+            ),
+            vol.Required(CONF_DIASPORA, default=DEFAULT_DIASPORA): bool,
+            vol.Optional(
+                CONF_PRAYER_ONLY, default=prayer_only_default
+            ): BooleanSelector(),
             vol.Optional(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
             vol.Optional(CONF_LONGITUDE, default=default_lon): vol.Coerce(float),
             vol.Optional(CONF_ELEVATION, default=default_elev): vol.Coerce(int),
@@ -47,7 +119,7 @@ def _get_data_schema(hass: HomeAssistant) -> vol.Schema:
 class HmemorialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Gérer le flux de configuration pour Hmemorial."""
 
-    VERSION = 1  # Numéro de version du schéma
+    VERSION = 3  # Numéro de version du schéma
 
     @staticmethod
     @callback
@@ -67,23 +139,17 @@ class HmemorialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            # On pourrait effectuer ici des vérifications supplémentaires
-            # (Ex: tester une API, vérifier un fichier, etc.)
-            # Si tout va bien, on crée l’entrée
             return self.async_create_entry(
-                title=DEFAULT_NAME,  # Nom de l'entrée dans HA
-                data=user_input,  # Données finales stockées dans la ConfigEntry
+                title=DEFAULT_NAME,
+                data=user_input,
             )
 
-        # Si on n’a pas de saisie, on affiche le formulaire
+        prayer_only_default = bool(self._async_current_entries())
         return self.async_show_form(
             step_id="user",
-            data_schema=_get_data_schema(self.hass),
+            data_schema=_get_data_schema(self.hass, prayer_only_default),
             errors=errors,
         )
-
-    # Si vous prévoyez d’autres étapes (reconfigure, etc.), vous pouvez
-    # les ajouter ici, sous forme de méthodes async_step_xxx.
 
 
 class HmemorialOptionsFlowHandler(config_entries.OptionsFlow):
@@ -104,8 +170,7 @@ class HmemorialOptionsFlowHandler(config_entries.OptionsFlow):
             # On enregistre les options
             return self.async_create_entry(data=user_input)
 
-        # On utilise un schéma défini dans const.py (OPTIONS_SCHEMA) ou on peut le construire ici
         return self.async_show_form(
             step_id="init",
-            data_schema=OPTIONS_SCHEMA,
+            data_schema=_get_options_schema(self.hass, self.config_entry),
         )
