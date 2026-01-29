@@ -15,6 +15,8 @@ CONF_DIASPORA = "diaspora"
 CONF_LANGUAGE = "language"
 CONF_TRADITION = "tradition"
 CONF_PRAYER_ONLY = "prayer_only"
+CONF_ENABLE_MEMORIAL = "enable_memorial"
+CONF_ENABLE_BIRTHDAY = "enable_birthday"
 CONF_ALTITUDE = "altitude"  # The name used by the hdate library for elevation
 
 CONF_CANDLE_LIGHT_MINUTES = "candle_lighting_minutes_before_sunset"
@@ -25,6 +27,8 @@ DEFAULT_CANDLE_LIGHT = 18
 DEFAULT_LANGUAGE = "en"
 DEFAULT_DIASPORA = True
 DEFAULT_TRADITION = "ashkenazi"
+DEFAULT_ENABLE_MEMORIAL = True
+DEFAULT_ENABLE_BIRTHDAY = True
 # Clés de configuration pour les options
 # Intervalles de mise à jour (en secondes)
 DEFAULT_SCAN_INTERVAL = 60

@@ -1,4 +1,89 @@
 {
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "tradition": "Tradition",
+          "language": "Langue",
+          "diaspora": "Diaspora (hors Israël)",
+          "enable_memorial": "Activer les mémoriaux",
+          "enable_birthday": "Activer les anniversaires",
+          "prayer_only": "Capteurs de prière uniquement",
+          "location": "Localisation (pays/ville)",
+          "elevation": "Altitude (m)",
+          "time_zone": "Fuseau horaire"
+        },
+        "data_description": {
+          "tradition": "Nusach/tradition pour les capteurs de prière.",
+          "language": "Langue d'affichage (ne modifie pas la date hébraïque).",
+          "diaspora": "Activez si votre localisation est en dehors d'Israël.",
+          "enable_memorial": "Crée les capteurs mémorial (aujourd'hui, demain, semaine en cours).",
+          "enable_birthday": "Crée les capteurs anniversaire (aujourd'hui, demain, semaine en cours).",
+          "prayer_only": "Crée uniquement les capteurs Bircat Hachanim, Parasha Hayom et Tahanounim.",
+          "location": "Choisissez un pays/ville ou déplacez l'épingle sur la carte. Les coordonnées servent aux calculs.",
+          "elevation": "Altitude en mètres au-dessus du niveau de la mer.",
+          "time_zone": "Fuseau horaire pour des heures de calendrier correctes."
+        }
+      },
+      "reconfigure": {
+        "data": {
+          "tradition": "Tradition",
+          "language": "Langue",
+          "diaspora": "Diaspora (hors Israël)",
+          "enable_memorial": "Activer les mémoriaux",
+          "enable_birthday": "Activer les anniversaires",
+          "prayer_only": "Capteurs de prière uniquement",
+          "location": "Localisation (pays/ville)",
+          "elevation": "Altitude (m)",
+          "time_zone": "Fuseau horaire"
+        },
+        "data_description": {
+          "tradition": "Nusach/tradition pour les capteurs de prière.",
+          "language": "Langue d'affichage (ne modifie pas la date hébraïque).",
+          "diaspora": "Activez si votre localisation est en dehors d'Israël.",
+          "enable_memorial": "Crée les capteurs mémorial (aujourd'hui, demain, semaine en cours).",
+          "enable_birthday": "Crée les capteurs anniversaire (aujourd'hui, demain, semaine en cours).",
+          "prayer_only": "Crée uniquement les capteurs Bircat Hachanim, Parasha Hayom et Tahanounim.",
+          "location": "Choisissez un pays/ville ou déplacez l'épingle sur la carte. Les coordonnées servent aux calculs.",
+          "elevation": "Altitude en mètres au-dessus du niveau de la mer.",
+          "time_zone": "Fuseau horaire pour des heures de calendrier correctes."
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configurer les options de HMemorial",
+        "data": {
+          "language": "Langue",
+          "tradition": "Tradition",
+          "diaspora": "Diaspora (hors Israël)",
+          "enable_memorial": "Activer les mémoriaux",
+          "enable_birthday": "Activer les anniversaires",
+          "prayer_only": "Capteurs de prière uniquement",
+          "location": "Localisation (pays/ville)",
+          "elevation": "Altitude (m)",
+          "time_zone": "Fuseau horaire",
+          "candle_lighting_minutes_before_sunset": "Minutes avant le coucher du soleil pour l'allumage des bougies",
+          "havdalah_minutes_after_sunset": "Minutes après le coucher du soleil pour la Havdalah"
+        },
+        "data_description": {
+          "language": "Langue à utiliser pour les capteurs de prière.",
+          "tradition": "Nusach/tradition à utiliser pour les capteurs de prière.",
+          "diaspora": "Activez si votre localisation est en dehors d'Israël.",
+          "enable_memorial": "Crée les capteurs mémorial (aujourd'hui, demain, semaine en cours).",
+          "enable_birthday": "Crée les capteurs anniversaire (aujourd'hui, demain, semaine en cours).",
+          "prayer_only": "Crée uniquement les capteurs Bircat Hachanim, Parasha Hayom et Tahanounim.",
+          "location": "Choisissez un pays/ville ou déplacez l'épingle sur la carte. Les coordonnées servent aux calculs.",
+          "elevation": "Altitude en mètres au-dessus du niveau de la mer.",
+          "time_zone": "Fuseau horaire pour des heures de calendrier correctes.",
+          "candle_lighting_minutes_before_sunset": "Par défaut 18 minutes. En Israël, vous voudrez probablement 20/30/40 selon votre lieu. Hors d'Israël, 18/24.",
+          "havdalah_minutes_after_sunset": "Mettre 0 utilise 36 minutes comme degrés fixes (8,5\u00b0)."
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "tahanounim": {

@@ -1,4 +1,89 @@
 {
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "tradition": "Tradition",
+          "language": "Language",
+          "diaspora": "Diaspora (outside Israel)",
+          "enable_memorial": "Enable memorials",
+          "enable_birthday": "Enable birthdays",
+          "prayer_only": "Prayer sensors only",
+          "location": "Location (country/city)",
+          "elevation": "Elevation (m)",
+          "time_zone": "Time zone"
+        },
+        "data_description": {
+          "tradition": "Nusach/tradition for prayer sensors.",
+          "language": "Language to use for display (does not change Hebrew date).",
+          "diaspora": "Enable if your location is outside Israel.",
+          "enable_memorial": "Create memorial sensors (today, tomorrow, current week).",
+          "enable_birthday": "Create birthday sensors (today, tomorrow, current week).",
+          "prayer_only": "Create only Bircat Hachanim, Parasha Hayom, and Tahanounim sensors.",
+          "location": "Pick a country/city or move the map pin. Coordinates are used for calendar calculations.",
+          "elevation": "Elevation in meters above sea level.",
+          "time_zone": "Time zone to use for correct calendar times."
+        }
+      },
+      "reconfigure": {
+        "data": {
+          "tradition": "Tradition",
+          "language": "Language",
+          "diaspora": "Diaspora (outside Israel)",
+          "enable_memorial": "Enable memorials",
+          "enable_birthday": "Enable birthdays",
+          "prayer_only": "Prayer sensors only",
+          "location": "Location (country/city)",
+          "elevation": "Elevation (m)",
+          "time_zone": "Time zone"
+        },
+        "data_description": {
+          "tradition": "Nusach/tradition for prayer sensors.",
+          "language": "Language to use for display (does not change Hebrew date).",
+          "diaspora": "Enable if your location is outside Israel.",
+          "enable_memorial": "Create memorial sensors (today, tomorrow, current week).",
+          "enable_birthday": "Create birthday sensors (today, tomorrow, current week).",
+          "prayer_only": "Create only Bircat Hachanim, Parasha Hayom, and Tahanounim sensors.",
+          "location": "Pick a country/city or move the map pin. Coordinates are used for calendar calculations.",
+          "elevation": "Elevation in meters above sea level.",
+          "time_zone": "Time zone to use for correct calendar times."
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure options for HMemorial",
+        "data": {
+          "language": "Language",
+          "tradition": "Tradition",
+          "diaspora": "Diaspora (outside Israel)",
+          "enable_memorial": "Enable memorials",
+          "enable_birthday": "Enable birthdays",
+          "prayer_only": "Prayer sensors only",
+          "location": "Location (country/city)",
+          "elevation": "Elevation (m)",
+          "time_zone": "Time zone",
+          "candle_lighting_minutes_before_sunset": "Minutes before sunset for candle lighting",
+          "havdalah_minutes_after_sunset": "Minutes after sunset for Havdalah"
+        },
+        "data_description": {
+          "language": "Language to use for prayer sensors.",
+          "tradition": "Nusach/Tradition to use for prayer sensors.",
+          "diaspora": "Enable if your location is outside Israel.",
+          "enable_memorial": "Create memorial sensors (today, tomorrow, current week).",
+          "enable_birthday": "Create birthday sensors (today, tomorrow, current week).",
+          "prayer_only": "Create only Bircat Hachanim, Parasha Hayom, and Tahanounim sensors.",
+          "location": "Pick a country/city or move the map pin. Coordinates are used for calendar calculations.",
+          "elevation": "Elevation in meters above sea level.",
+          "time_zone": "Time zone to use for correct calendar times.",
+          "candle_lighting_minutes_before_sunset": "Defaults to 18 minutes. In Israel you probably want to use 20/30/40 depending on your location. Outside of Israel you probably want to use 18/24.",
+          "havdalah_minutes_after_sunset": "Setting this to 0 means 36 minutes as fixed degrees (8.5\u00b0) will be used instead"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "tahanounim": {

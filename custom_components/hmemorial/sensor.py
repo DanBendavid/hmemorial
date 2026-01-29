@@ -21,7 +21,11 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     ATTRIBUTION,
+    CONF_ENABLE_BIRTHDAY,
+    CONF_ENABLE_MEMORIAL,
     CONF_PRAYER_ONLY,
+    DEFAULT_ENABLE_BIRTHDAY,
+    DEFAULT_ENABLE_MEMORIAL,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
     DEFAULT_TRADITION,
@@ -102,61 +106,69 @@ async def async_setup_entry(
     language = conf.get("language", DEFAULT_LANGUAGE)
 
     prayer_only = conf.get(CONF_PRAYER_ONLY, False)
+    enable_memorial = conf.get(CONF_ENABLE_MEMORIAL, DEFAULT_ENABLE_MEMORIAL)
+    enable_birthday = conf.get(CONF_ENABLE_BIRTHDAY, DEFAULT_ENABLE_BIRTHDAY)
 
     sensors = []
     if not prayer_only:
-        sensors.extend(
-            [
-                MemorialSensor(
-                    coordinator,
-                    "memorial_today",
-                    "Memorial Today",
-                    target_date=datetime.now().date(),
-                    language=language,
-                    entry_id=entry.entry_id,
-                ),
-                MemorialSensor(
-                    coordinator,
-                    "memorial_tomorrow",
-                    "Memorial Tomorrow",
-                    target_date=datetime.now().date() + timedelta(days=1),
-                    language=language,
-                    entry_id=entry.entry_id,
-                ),
-                MemorialSensor(
-                    coordinator,
-                    "memorial_current_week",
-                    "Memorial Current Week",
-                    within_week=True,
-                    language=language,
-                    entry_id=entry.entry_id,
-                ),
-                BirthdaySensor(
-                    coordinator,
-                    "birthday_today",
-                    "Birthday Today",
-                    target_date=datetime.now().date(),
-                    language=language,
-                    entry_id=entry.entry_id,
-                ),
-                BirthdaySensor(
-                    coordinator,
-                    "birthday_tomorrow",
-                    "Birthday Tomorrow",
-                    target_date=datetime.now().date() + timedelta(days=1),
-                    language=language,
-                    entry_id=entry.entry_id,
-                ),
-                BirthdaySensor(
-                    coordinator,
-                    "birthday_current_week",
-                    "Birthday Current Week",
-                    within_week=True,
-                    language=language,
-                    entry_id=entry.entry_id,
-                ),
-            ]
-        )
+        if enable_memorial:
+            sensors.extend(
+                [
+                    MemorialSensor(
+                        coordinator,
+                        "memorial_today",
+                        "Memorial Today",
+                        target_date=datetime.now().date(),
+                        language=language,
+                        entry_id=entry.entry_id,
+                    ),
+                    MemorialSensor(
+                        coordinator,
+                        "memorial_tomorrow",
+                        "Memorial Tomorrow",
+                        target_date=datetime.now().date() + timedelta(days=1),
+                        language=language,
+                        entry_id=entry.entry_id,
+                    ),
+                    MemorialSensor(
+                        coordinator,
+                        "memorial_current_week",
+                        "Memorial Current Week",
+                        within_week=True,
+                        language=language,
+                        entry_id=entry.entry_id,
+                    ),
+                ]
+            )
+        if enable_birthday:
+            sensors.extend(
+                [
+                    BirthdaySensor(
+                        coordinator,
+                        "birthday_today",
+                        "Birthday Today",
+                        target_date=datetime.now().date(),
+                        language=language,
+                        entry_id=entry.entry_id,
+                    ),
+                    BirthdaySensor(
+                        coordinator,
+                        "birthday_tomorrow",
+                        "Birthday Tomorrow",
+                        target_date=datetime.now().date() + timedelta(days=1),
+                        language=language,
+                        entry_id=entry.entry_id,
+                    ),
+                    BirthdaySensor(
+                        coordinator,
+                        "birthday_current_week",
+                        "Birthday Current Week",
+                        within_week=True,
+                        language=language,
+                        entry_id=entry.entry_id,
+                    ),
+                ]
+            )
 
     sensors.extend(
         [

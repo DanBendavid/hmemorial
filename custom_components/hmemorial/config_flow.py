@@ -30,11 +30,15 @@ from homeassistant.helpers.selector import (
 from .const import (
     CONF_CANDLE_LIGHT_MINUTES,
     CONF_DIASPORA,
+    CONF_ENABLE_BIRTHDAY,
+    CONF_ENABLE_MEMORIAL,
     CONF_HAVDALAH_OFFSET_MINUTES,
     CONF_PRAYER_ONLY,
     CONF_TRADITION,
     DEFAULT_CANDLE_LIGHT,
     DEFAULT_DIASPORA,
+    DEFAULT_ENABLE_BIRTHDAY,
+    DEFAULT_ENABLE_MEMORIAL,
     DEFAULT_HAVDALAH_OFFSET_MINUTES,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
@@ -48,16 +52,43 @@ NUSACHIM = ["ashkenazi", "sephardi"]
 # LANGUAGES = ["he", "fr", "en"]
 
 
+def _tradition_selector() -> SelectSelector:
+    return SelectSelector(
+        SelectSelectorConfig(
+            options=[
+                {"value": value, "label": value.capitalize()} for value in NUSACHIM
+            ]
+        )
+    )
+
+
+def _apply_location_to_input(user_input: dict[str, Any]) -> dict[str, Any]:
+    location = user_input.pop(CONF_LOCATION, None)
+    if isinstance(location, dict):
+        lat = location.get("latitude")
+        lon = location.get("longitude")
+        if lat is not None:
+            user_input[CONF_LATITUDE] = float(lat)
+        if lon is not None:
+            user_input[CONF_LONGITUDE] = float(lon)
+    return user_input
+
+
 def _get_options_schema(
     hass: HomeAssistant, entry: config_entries.ConfigEntry
 ) -> vol.Schema:
     """Créer le schéma des options."""
     merged = {**entry.data, **entry.options}
+    default_lat = merged.get(CONF_LATITUDE, hass.config.latitude)
+    default_lon = merged.get(CONF_LONGITUDE, hass.config.longitude)
+    default_elev = merged.get(CONF_ELEVATION, hass.config.elevation)
+    default_tz = merged.get(CONF_TIME_ZONE, hass.config.time_zone)
+    location_default = {"latitude": default_lat, "longitude": default_lon}
     return vol.Schema(
         {
             vol.Optional(
                 CONF_TRADITION, default=merged.get(CONF_TRADITION, DEFAULT_TRADITION)
-            ): vol.In(NUSACHIM),
+            ): _tradition_selector(),
             vol.Optional(
                 CONF_LANGUAGE, default=merged.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
             ): LanguageSelector(
@@ -65,10 +96,23 @@ def _get_options_schema(
             ),
             vol.Optional(
                 CONF_DIASPORA, default=merged.get(CONF_DIASPORA, DEFAULT_DIASPORA)
-            ): bool,
+            ): BooleanSelector(),
+            vol.Optional(
+                CONF_ENABLE_MEMORIAL,
+                default=merged.get(CONF_ENABLE_MEMORIAL, DEFAULT_ENABLE_MEMORIAL),
+            ): BooleanSelector(),
+            vol.Optional(
+                CONF_ENABLE_BIRTHDAY,
+                default=merged.get(CONF_ENABLE_BIRTHDAY, DEFAULT_ENABLE_BIRTHDAY),
+            ): BooleanSelector(),
             vol.Optional(
                 CONF_PRAYER_ONLY, default=merged.get(CONF_PRAYER_ONLY, False)
             ): BooleanSelector(),
+            vol.Optional(CONF_LOCATION, default=location_default): LocationSelector(),
+            vol.Optional(CONF_ELEVATION, default=default_elev): vol.Coerce(int),
+            vol.Optional(CONF_TIME_ZONE, default=default_tz): vol.In(
+                sorted(zoneinfo.available_timezones())
+            ),
             vol.Optional(
                 CONF_CANDLE_LIGHT_MINUTES,
                 default=merged.get(CONF_CANDLE_LIGHT_MINUTES, DEFAULT_CANDLE_LIGHT),
@@ -92,22 +136,28 @@ def _get_data_schema(
     default_lon = hass.config.longitude
     default_elev = hass.config.elevation
     default_tz = hass.config.time_zone
+    location_default = {"latitude": default_lat, "longitude": default_lon}
 
     # On peut regrouper 'latitude' et 'longitude' dans un dict "location",
     # ou bien les exposer séparément.
     # Ici, on les expose séparément pour la lisibilité.
     return vol.Schema(
         {
-            vol.Required(CONF_TRADITION, default=DEFAULT_TRADITION): vol.In(NUSACHIM),
+            vol.Required(CONF_TRADITION, default=DEFAULT_TRADITION): _tradition_selector(),
             vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): LanguageSelector(
                 LanguageSelectorConfig(languages=list(get_args(Language)))
             ),
-            vol.Required(CONF_DIASPORA, default=DEFAULT_DIASPORA): bool,
+            vol.Required(CONF_DIASPORA, default=DEFAULT_DIASPORA): BooleanSelector(),
+            vol.Optional(
+                CONF_ENABLE_MEMORIAL, default=DEFAULT_ENABLE_MEMORIAL
+            ): BooleanSelector(),
+            vol.Optional(
+                CONF_ENABLE_BIRTHDAY, default=DEFAULT_ENABLE_BIRTHDAY
+            ): BooleanSelector(),
             vol.Optional(
                 CONF_PRAYER_ONLY, default=prayer_only_default
             ): BooleanSelector(),
-            vol.Optional(CONF_LATITUDE, default=default_lat): vol.Coerce(float),
-            vol.Optional(CONF_LONGITUDE, default=default_lon): vol.Coerce(float),
+            vol.Optional(CONF_LOCATION, default=location_default): LocationSelector(),
             vol.Optional(CONF_ELEVATION, default=default_elev): vol.Coerce(int),
             vol.Optional(CONF_TIME_ZONE, default=default_tz): vol.In(
                 sorted(zoneinfo.available_timezones())
@@ -139,6 +189,7 @@ class HmemorialConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
+            user_input = _apply_location_to_input(user_input)
             return self.async_create_entry(
                 title=DEFAULT_NAME,
                 data=user_input,
@@ -168,6 +219,7 @@ class HmemorialOptionsFlowHandler(config_entries.OptionsFlow):
         """
         if user_input is not None:
             # On enregistre les options
+            user_input = _apply_location_to_input(user_input)
             return self.async_create_entry(data=user_input)
 
         return self.async_show_form(

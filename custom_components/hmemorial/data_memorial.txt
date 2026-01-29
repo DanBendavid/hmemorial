@@ -1,7 +1,10 @@
-Georgette Zahara bat Sarah, 1, 4, 5778
-Sarah bat Tamo, 6, 5, 5756
-Zahra, 13, 5, 5733
-Margalith, 26, 5, 5780
-Yaakov ben Yossef, 7, 5, 5764
-Ayouch ben Zahra, 17, 9, 5749
-Juliette haya bat Sarah, 7, 14, 5780
+Lea bat Miriam, 3, 2, 5779
+David ben Ezra, 10, 7, 5768
+Rivka bat Hanna, 22, 9, 5754
+Yosef ben Ariel, 15, 11, 5785
+Maya bat Esther, 5, 1, 5771
+Noah ben Daniel, 18, 4, 5762
+Sara bat Lea, 9, 6, 5782
+Test Memorial Today, 10, 5, 5786
+Test Memorial Tomorrow, 11, 5, 5786
+Test Memorial Weekend, 13, 5, 5786
