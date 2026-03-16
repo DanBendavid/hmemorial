@@ -345,8 +345,8 @@ const hmemorialCard = window.customCards.find(
 if (!hmemorialCard) {
   window.customCards.push({
     type: "hmemorial-card",
-    name: "HMemorial",
-    description: "Hebrew memorial events and birthdays",
+    name: "Yahrtzeit/Hazkara by HMemorial ",
+    description: "Hebrew memorial events",
   });
 }
 
@@ -356,7 +356,7 @@ const hmemorialBirthdayCard = window.customCards.find(
 if (!hmemorialBirthdayCard) {
   window.customCards.push({
     type: "hmemorial-birthday-card",
-    name: "HMemorial Birthday",
+    name: "Birthday by HMemorial",
     description: "Birthday summary card",
   });
 }

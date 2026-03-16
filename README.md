@@ -96,7 +96,7 @@ Sensor names include a suffix like `en_diaspora_ashkenazi` based on options.
 This integration ships two simple cards: one for memorial events and one for birthdays.
 
 1. Add resource:
-   - URL: `/local/community/hmemorial/hmemorial-card.js`
+   - URL: `/hackfiles/hmemorial-card/hmemorial-card.js`
    - Type: `module`
 2. Example cards:
 
