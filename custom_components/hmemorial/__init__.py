@@ -9,6 +9,7 @@ from functools import partial
 from pathlib import Path
 
 from hdate import Location
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 from homeassistant.core import callback
 from homeassistant.config_entries import ConfigEntry
@@ -37,6 +38,7 @@ from .entity import HmemorialData  # ou Hmemorialdata selon le nom correct
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[str] = ["sensor"]  # Plates-formes gérées
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 _FRONTEND_URL = "/hmemorial/hmemorial-card.js"
 _FRONTEND_FILE = Path(__file__).parent / "frontend" / "hmemorial-card.js"
 _COMMUNITY_CARD_DIR = Path("www") / "community" / "hmemorial-card"
